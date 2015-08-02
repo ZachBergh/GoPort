@@ -6,6 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	"io/ioutil"
 	"os/exec"
+	"sync"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 	app.Name = "goport"
 	app.Usage = "Check your linux's port"
 	app.Action = func(c *cli.Context) {
-		cmd := `netstat -an | grep LISTEN | egrep "0.0.0.0|:::" | awk '/^tcp/ {print $4}' | awk -F: '{print $2$4}' | sort -n`
+		cmd := `netstat -an | grep LISTEN | egrep '0.0.0.0|:::' | awk '/^tcp/ {print $4}' | awk -F: '{print $2$4}' | sort -n`
 		cmdType := "bash"
 		out, err := run(cmd, cmdType)
 		if err != nil {
@@ -24,6 +25,9 @@ func main() {
 }
 
 func run(cmd, tp string) (result string, err error) {
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+
 	var c *exec.Cmd
 	switch tp {
 	case "bash":
@@ -64,5 +68,6 @@ func run(cmd, tp string) (result string, err error) {
 	}
 	fmt.Printf("stdout: %s", bytes)
 	result = string(bytes)
+	wg.Done()
 	return
 }
