@@ -6,7 +6,6 @@ import (
 	"github.com/codegangsta/cli"
 	"io/ioutil"
 	"os/exec"
-	"sync"
 )
 
 func main() {
@@ -25,9 +24,6 @@ func main() {
 }
 
 func run(cmd, tp string) (result string, err error) {
-	wg := new(sync.WaitGroup)
-	wg.Add(1)
-
 	var c *exec.Cmd
 	switch tp {
 	case "bash":
@@ -66,8 +62,6 @@ func run(cmd, tp string) (result string, err error) {
 	if err = c.Wait(); err != nil {
 		return
 	}
-	fmt.Printf("stdout: %s", bytes)
 	result = string(bytes)
-	wg.Done()
 	return
 }
